@@ -145,12 +145,13 @@ export default function Home() {
       {/* Product Grid */}
       <main className="max-w-5xl mx-auto px-4 py-4">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-40 w-full" />
-                <div className="p-4 space-y-2">
+                <Skeleton className="h-28 w-full sm:h-36" />
+                <div className="p-3.5 space-y-2">
                   <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/3" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>
               </Card>
@@ -177,7 +178,7 @@ export default function Home() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filtered.map((product) => (
               <ProductCard
                 key={product.id}
@@ -254,61 +255,77 @@ function ProductCard({
       className="overflow-hidden group transition-all hover:shadow-md"
       data-testid={`card-product-${product.id}`}
     >
-      {/* Image */}
-      <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-        {product.imageData && !imgError ? (
-          <img
-            src={product.imageData}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
-          </div>
-        )}
-        <Badge
-          variant="secondary"
-          className="absolute top-2.5 left-2.5 text-xs bg-background/85 backdrop-blur-sm"
-        >
-          {product.category}
-        </Badge>
-      </div>
+      <div className="flex gap-3 p-3 sm:block sm:p-0">
+        {/* Image */}
+        <div className="h-24 w-24 shrink-0 bg-muted relative overflow-hidden rounded-lg sm:h-auto sm:w-full sm:rounded-none sm:aspect-[5/4]">
+          {product.imageData && !imgError ? (
+            <img
+              src={product.imageData}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-8 h-8 text-muted-foreground/40 sm:w-10 sm:h-10" />
+            </div>
+          )}
+          <Badge
+            variant="secondary"
+            className="hidden sm:inline-flex absolute top-2.5 left-2.5 text-xs bg-background/85 backdrop-blur-sm"
+          >
+            {product.category}
+          </Badge>
+        </div>
 
-      {/* Info */}
-      <div className="p-3.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-medium text-sm truncate" data-testid={`text-name-${product.id}`}>
-              {product.name}
-            </h3>
-            <p className="text-lg font-semibold text-primary mt-0.5" data-testid={`text-price-${product.id}`}>
-              ¥{product.price.toFixed(2)}
-            </p>
-            {product.note && (
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.note}</p>
-            )}
-          </div>
-          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={onEdit}
-              data-testid={`button-edit-${product.id}`}
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={onDelete}
-              data-testid={`button-delete-${product.id}`}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+        {/* Info */}
+        <div className="min-w-0 flex-1 sm:p-3.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h3
+                className="font-medium text-sm leading-5 line-clamp-2 sm:text-[15px]"
+                data-testid={`text-name-${product.id}`}
+              >
+                {product.name}
+              </h3>
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Tag className="w-3.5 h-3.5 shrink-0" />
+                <Badge variant="outline" className="px-2 py-0 text-[11px] font-medium">
+                  {product.category}
+                </Badge>
+              </div>
+              <p
+                className="text-base font-semibold text-primary mt-2 sm:text-lg"
+                data-testid={`text-price-${product.id}`}
+              >
+                ¥{product.price.toFixed(2)}
+              </p>
+              {product.note && (
+                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                  {product.note}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onEdit}
+                data-testid={`button-edit-${product.id}`}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                onClick={onDelete}
+                data-testid={`button-delete-${product.id}`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
