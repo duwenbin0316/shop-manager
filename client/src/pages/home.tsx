@@ -256,9 +256,9 @@ function ProductCard({
     >
       {/* Image */}
       <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-        {product.imageUrl && !imgError ? (
+        {product.imageData && !imgError ? (
           <img
-            src={product.imageUrl}
+            src={product.imageData}
             alt={product.name}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
             onError={() => setImgError(true)}

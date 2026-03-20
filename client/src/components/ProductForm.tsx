@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 
 interface ProductFormProps {
   product: Product | null;
@@ -18,7 +18,38 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
+// Compress image on client side before sending
+function compressImage(file: File, maxWidth = 800, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas not supported"));
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function ProductForm({ product, categories, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
@@ -28,7 +59,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
   const [price, setPrice] = useState(product?.price?.toString() ?? "");
   const [category, setCategory] = useState(product?.category ?? "");
   const [customCategory, setCustomCategory] = useState("");
-  const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? "");
+  const [imageData, setImageData] = useState(product?.imageData ?? "");
   const [note, setNote] = useState(product?.note ?? "");
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,20 +89,13 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
     },
   });
 
-  const handleUpload = async (file: File) => {
+  const handleImageSelect = async (file: File) => {
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const res = await fetch(`${API_BASE}/api/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Upload failed");
-      const data = await res.json();
-      setImageUrl(data.url);
+      const compressed = await compressImage(file, 800, 0.7);
+      setImageData(compressed);
     } catch {
-      toast({ title: "图片上传失败", variant: "destructive" });
+      toast({ title: "图片处理失败", variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -85,7 +109,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
       name: name.trim(),
       price: parseFloat(price),
       category: effectiveCategory.trim(),
-      imageUrl: imageUrl || null,
+      imageData: imageData || null,
       note: note.trim() || null,
     };
 
@@ -115,20 +139,20 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) handleUpload(file);
+            if (file) handleImageSelect(file);
           }}
           data-testid="input-image-file"
         />
-        {imageUrl ? (
+        {imageData ? (
           <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-muted">
             <img
-              src={imageUrl}
+              src={imageData}
               alt="Preview"
               className="w-full h-full object-cover"
             />
             <button
               type="button"
-              onClick={() => setImageUrl("")}
+              onClick={() => setImageData("")}
               className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background"
               data-testid="button-remove-image"
             >
@@ -149,7 +173,7 @@ export default function ProductForm({ product, categories, onSuccess, onCancel }
               <>
                 <Upload className="w-8 h-8" />
                 <span className="text-sm">点击上传图片</span>
-                <span className="text-xs">支持 JPG/PNG/GIF/WEBP，最大 5MB</span>
+                <span className="text-xs">自动压缩，不用担心大小</span>
               </>
             )}
           </button>
