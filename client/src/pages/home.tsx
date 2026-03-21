@@ -249,86 +249,110 @@ function ProductCard({
   onDelete: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const canPreview = !!product.imageData && !imgError;
+  const previewImageSrc = canPreview ? product.imageData ?? undefined : undefined;
 
   return (
-    <Card
-      className="overflow-hidden group transition-all hover:shadow-md"
-      data-testid={`card-product-${product.id}`}
-    >
-      <div className="flex gap-3 p-3 sm:block sm:p-0">
-        {/* Image */}
-        <div className="h-24 w-24 shrink-0 bg-muted relative overflow-hidden rounded-lg sm:h-auto sm:w-full sm:rounded-none sm:aspect-[5/4]">
-          {product.imageData && !imgError ? (
-            <img
-              src={product.imageData}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageIcon className="w-8 h-8 text-muted-foreground/40 sm:w-10 sm:h-10" />
-            </div>
-          )}
-          <Badge
-            variant="secondary"
-            className="hidden sm:inline-flex absolute top-2.5 left-2.5 text-xs bg-background/85 backdrop-blur-sm"
+    <>
+      <Card
+        className="overflow-hidden group transition-all hover:shadow-md"
+        data-testid={`card-product-${product.id}`}
+      >
+        <div className="flex gap-3 p-3 sm:block sm:p-0">
+          {/* Image */}
+          <button
+            type="button"
+            className="h-24 w-24 shrink-0 bg-muted relative overflow-hidden rounded-lg sm:h-auto sm:w-full sm:rounded-none sm:aspect-[5/4] text-left disabled:cursor-default"
+            onClick={() => canPreview && setPreviewOpen(true)}
+            disabled={!canPreview}
+            data-testid={`button-preview-image-${product.id}`}
           >
-            {product.category}
-          </Badge>
-        </div>
-
-        {/* Info */}
-        <div className="min-w-0 flex-1 sm:p-3.5">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3
-                className="font-medium text-sm leading-5 line-clamp-2 sm:text-[15px]"
-                data-testid={`text-name-${product.id}`}
-              >
-                {product.name}
-              </h3>
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Tag className="w-3.5 h-3.5 shrink-0" />
-                <Badge variant="outline" className="px-2 py-0 text-[11px] font-medium">
-                  {product.category}
-                </Badge>
+            {canPreview ? (
+              <img
+                src={previewImageSrc}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform group-hover:scale-105 cursor-zoom-in"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <ImageIcon className="w-8 h-8 text-muted-foreground/40 sm:w-10 sm:h-10" />
               </div>
-              <p
-                className="text-base font-semibold text-primary mt-2 sm:text-lg"
-                data-testid={`text-price-${product.id}`}
-              >
-                ¥{product.price.toFixed(2)}
-              </p>
-              {product.note && (
-                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                  {product.note}
+            )}
+            <Badge
+              variant="secondary"
+              className="hidden sm:inline-flex absolute top-2.5 left-2.5 text-xs bg-background/85 backdrop-blur-sm"
+            >
+              {product.category}
+            </Badge>
+          </button>
+
+          {/* Info */}
+          <div className="min-w-0 flex-1 sm:p-3.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <h3
+                  className="font-medium text-sm leading-5 line-clamp-2 sm:text-[15px]"
+                  data-testid={`text-name-${product.id}`}
+                >
+                  {product.name}
+                </h3>
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Tag className="w-3.5 h-3.5 shrink-0" />
+                  <Badge variant="outline" className="px-2 py-0 text-[11px] font-medium">
+                    {product.category}
+                  </Badge>
+                </div>
+                <p
+                  className="text-base font-semibold text-primary mt-2 sm:text-lg"
+                  data-testid={`text-price-${product.id}`}
+                >
+                  ¥{product.price.toFixed(2)}
                 </p>
-              )}
-            </div>
-            <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={onEdit}
-                data-testid={`button-edit-${product.id}`}
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive"
-                onClick={onDelete}
-                data-testid={`button-delete-${product.id}`}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
+                {product.note && (
+                  <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                    {product.note}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={onEdit}
+                  data-testid={`button-edit-${product.id}`}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  onClick={onDelete}
+                  data-testid={`button-delete-${product.id}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl p-2 sm:p-4">
+          {canPreview && (
+            <img
+              src={previewImageSrc}
+              alt={`${product.name} 预览图`}
+              className="w-full max-h-[80vh] object-contain rounded-md"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
