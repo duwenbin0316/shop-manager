@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -343,7 +343,17 @@ function ProductCard({
       </Card>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-3xl p-2 sm:p-4">
+        <DialogContent
+          hideClose
+          className="max-w-3xl border-0 bg-transparent p-2 shadow-none sm:p-4"
+        >
+          <DialogClose
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/20 text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-white/35 focus:outline-none focus:ring-2 focus:ring-white/80 focus:ring-offset-0"
+            aria-label="关闭预览"
+            data-testid={`button-close-preview-${product.id}`}
+          >
+            <X className="h-5 w-5" />
+          </DialogClose>
           {canPreview && (
             <img
               src={previewImageSrc}
